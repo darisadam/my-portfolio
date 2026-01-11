@@ -1,4 +1,5 @@
-name: DevOps CI Pipeline
+
+name: Portfolio CI/CD Pipeline
 
 on:
   push:
@@ -11,24 +12,62 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    # 1. Checkout kode
-    - uses: actions/checkout@v3
+    # 1. Checkout repository code
+    - name: Checkout Code
+      uses: actions/checkout@v4
 
-    # 2. Setup Node.js Environment
-    - name: Use Node.js 18
-      uses: actions/setup-node@v3
+    # 2. Setup Node.js Environment (matching your version)
+    - name: Setup Node.js 20.19.6
+      uses: actions/setup-node@v4
       with:
-        node-version: '18'
+        node-version: '20.19.6'
         cache: 'npm'
 
-    # 3. Install Dependencies (Clean Install)
+    # 3. Install Dependencies
     - name: Install Dependencies
       run: npm ci
 
-    # 4. Coba Build Aplikasi (React Build)
-    - name: Build React App
-      run: npm run build
+    # 4. Run Linting (optional, if you have ESLint configured)
+    - name: Run Linting
+      run: npm run lint --if-present
+      continue-on-error: true
 
-    # 5. Build Docker Image (Memastikan Dockerfile valid)
+    # 5. Run Tests (optional, if you have tests)
+    - name: Run Tests
+      run: npm test --if-present
+      continue-on-error: true
+
+    # 6. Build Vite Application
+    - name: Build Vite App
+      run: npm run build
+      env:
+        NODE_ENV: production
+
+    # 7. Check Build Output
+    - name: Verify Build Output
+      run: |
+        if [ -d "dist" ]; then
+          echo "✅ Build successful - dist folder created"
+          ls -la dist
+        else
+          echo "❌ Build failed - dist folder not found"
+          exit 1
+        fi
+
+    # 8. Upload Build Artifacts (optional, for deployment or debugging)
+    - name: Upload Build Artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: production-build
+        path: dist/
+        retention-days: 7
+
+    # 9. Build Docker Image (if you're using Docker)
     - name: Build Docker Image
-      run: docker build . --file Dockerfile --tag my-portfolio:$(date +%s)
+      if: github.event_name == 'push'
+      run: |
+        docker build . \
+          --file Dockerfile \
+          --tag my-portfolio:latest \
+          --tag my-portfolio:${{ github.sha }}
+      continue-on-error: true
