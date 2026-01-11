@@ -1,0 +1,83 @@
+name: Deploy to Vercel
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+  workflow_dispatch: # Allows manual deployment
+
+env:
+  VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+  VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    # 1. Checkout repository
+    - name: Checkout Code
+      uses: actions/checkout@v4
+
+    # 2. Setup Node.js
+    - name: Setup Node.js 20.19.6
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20.19.6'
+        cache: 'npm'
+
+    # 3. Install Vercel CLI
+    - name: Install Vercel CLI
+      run: npm install --global vercel@latest
+
+    # 4. Pull Vercel Environment Information
+    - name: Pull Vercel Environment Information
+      run: vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
+
+    # 5. Build Project Artifacts
+    - name: Build Project Artifacts
+      run: vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
+
+    # 6. Deploy to Vercel (Production)
+    - name: Deploy to Vercel Production
+      if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+      run: |
+        url=$(vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }})
+        echo "🚀 Deployed to: $url"
+        echo "DEPLOYMENT_URL=$url" >> $GITHUB_ENV
+
+    # 7. Deploy to Vercel (Preview for PRs)
+    - name: Deploy to Vercel Preview
+      if: github.event_name == 'pull_request'
+      run: |
+        url=$(vercel deploy --prebuilt --token=${{ secrets.VERCEL_TOKEN }})
+        echo "🔍 Preview deployed to: $url"
+        echo "PREVIEW_URL=$url" >> $GITHUB_ENV
+
+    # 8. Comment PR with preview URL (optional)
+    - name: Comment PR with Preview URL
+      if: github.event_name == 'pull_request'
+      uses: actions/github-script@v7
+      with:
+        github-token: ${{ secrets.GITHUB_TOKEN }}
+        script: |
+          github.rest.issues.createComment({
+            issue_number: context.issue.number,
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            body: `🚀 Preview deployment ready!\n\n✅ URL: ${process.env.PREVIEW_URL}`
+          })
+
+    # 9. Deployment Summary
+    - name: Deployment Summary
+      run: |
+        echo "### 🎉 Deployment Complete!" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        if [ "${{ github.event_name }}" == "push" ]; then
+          echo "**Production URL:** ${{ env.DEPLOYMENT_URL }}" >> $GITHUB_STEP_SUMMARY
+        else
+          echo "**Preview URL:** ${{ env.PREVIEW_URL }}" >> $GITHUB_STEP_SUMMARY
+        fi
+        echo "**Branch:** ${{ github.ref_name }}" >> $GITHUB_STEP_SUMMARY
+        echo "**Commit:** ${{ github.sha }}" >> $GITHUB_STEP_SUMMARY
