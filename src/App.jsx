@@ -1,424 +1,481 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   Terminal, 
-  Server, 
-  Cloud, 
-  ShieldCheck, 
-  Code, 
-  GitBranch, 
-  AlertTriangle, 
-  CheckCircle, 
   Smartphone, 
-  Cpu, 
-  Globe, 
-  ChevronDown, 
-  ChevronUp,
+  Gamepad2, 
+  ChevronRight, 
+  ArrowLeft,
+  Github, 
+  Linkedin, 
+  Mail, 
   ExternalLink,
-  Github,
-  Linkedin,
-  Mail
+  Code2,
+  Layers,
+  BookOpen,
+  Briefcase,
+  Sparkles,
+  Download
 } from 'lucide-react';
 
-const Portfolio = () => {
-  const [activeSection, setActiveSection] = useState('hero');
-  const [openIncident, setOpenIncident] = useState(null);
+/* =============================================================================
+  CONTENT DATA CENTER
+  Edit this section to change your website's content easily.
+  =============================================================================
+*/
 
-  const toggleIncident = (index) => {
-    setOpenIncident(openIncident === index ? null : index);
-  };
+const DATA = {
+  profile: {
+    name: "Your Name",
+    title: "Software Engineer",
+    tagline: "Bridging Mobile Development, Cloud Infrastructure, and Interactive Media.",
+    social: {
+      github: "https://github.com",
+      linkedin: "https://linkedin.com",
+      email: "mailto:email@example.com"
+    },
+    about: "I am a versatile engineer who doesn't just write code—I build ecosystems. With a background spanning from pixel-perfect iOS apps to resilient Kubernetes clusters, I bring a holistic view to software engineering.",
+    experience: [
+      {
+        role: "Senior DevOps Engineer",
+        company: "Tech Corp",
+        period: "2023 - Present",
+        desc: "Leading infrastructure automation and CI/CD pipelines for mobile teams."
+      },
+      {
+        role: "iOS Developer",
+        company: "App Studio",
+        period: "2020 - 2023",
+        desc: "Developed 5+ App Store featured applications using Swift and SwiftUI."
+      }
+    ],
+    education: [
+      {
+        degree: "B.S. Computer Science",
+        school: "University of Technology",
+        year: "2016 - 2020"
+      }
+    ]
+  },
+  
+  portfolios: {
+    ios: {
+      id: 'ios',
+      title: "iOS Development",
+      icon: <Smartphone size={40} />,
+      color: "from-blue-500 to-cyan-500",
+      textColor: "text-blue-400",
+      bgGradient: "from-blue-500/20 via-cyan-500/10 to-transparent",
+      description: "Crafting fluid, user-centric mobile experiences with Swift & SwiftUI.",
+      skills: ["Swift", "SwiftUI", "UIKit", "CoreData", "Combine", "XCTest"],
+      projects: [
+        {
+          title: "FinTrack Mobile",
+          tags: ["SwiftUI", "CoreData"],
+          desc: "A personal finance tracker with intricate charts and iCloud sync.",
+          link: "#"
+        },
+        {
+          title: "HealthConnect",
+          tags: ["HealthKit", "MVVM"],
+          desc: "Integration with Apple Health to visualize daily activity metrics.",
+          link: "#"
+        }
+      ]
+    },
+    devops: {
+      id: 'devops',
+      title: "DevOps & Cloud",
+      icon: <Terminal size={40} />,
+      color: "from-emerald-500 to-teal-500",
+      textColor: "text-emerald-400",
+      bgGradient: "from-emerald-500/20 via-teal-500/10 to-transparent",
+      description: "Building reliable, scalable, and secure infrastructure as code.",
+      skills: ["AWS", "Terraform", "Docker", "Kubernetes", "GitHub Actions", "Fastlane"],
+      projects: [
+        {
+          title: "The 'Hybrid' Pipeline",
+          tags: ["Fastlane", "GitHub Actions", "S3"],
+          desc: "Reduced release time from 2 hours to 15 minutes with zero-touch signing.",
+          link: "#"
+        },
+        {
+          title: "Terraform Modules",
+          tags: ["Terraform", "AWS", "DynamoDB"],
+          desc: "Modular infrastructure with safe state locking and automated drift detection.",
+          link: "#"
+        }
+      ]
+    },
+    game: {
+      id: 'game',
+      title: "Game Development",
+      icon: <Gamepad2 size={40} />,
+      color: "from-purple-500 to-pink-500",
+      textColor: "text-purple-400",
+      bgGradient: "from-purple-500/20 via-pink-500/10 to-transparent",
+      description: "Creating immersive interactive worlds and gameplay mechanics.",
+      skills: ["Unity", "C#", "Shader Graph", "Blender", "Game Physics"],
+      projects: [
+        {
+          title: "Neon Racer",
+          tags: ["Unity", "C#"],
+          desc: "A high-speed endless runner with reactive audio visualization.",
+          link: "#"
+        },
+        {
+          title: "RPG Inventory System",
+          tags: ["C#", "Design Patterns"],
+          desc: "A flexible grid-based inventory system supporting stacking and crafting.",
+          link: "#"
+        }
+      ]
+    }
+  }
+};
 
-  const navItems = [
-    { id: 'about', label: 'Tentang Saya' },
-    { id: 'skills', label: 'Tech Stack' },
-    { id: 'projects', label: 'Proyek Utama' },
-    { id: 'incidents', label: 'Problem Solving' },
-  ];
+/* =============================================================================
+  COMPONENTS
+  =============================================================================
+*/
 
+const Card = ({ children, className = "" }) => (
+  <div className={`bg-gradient-to-br from-slate-800/90 to-slate-900/90 backdrop-blur-lg border border-slate-700/50 rounded-2xl p-6 hover:border-slate-600 hover:shadow-2xl hover:shadow-blue-500/10 transition-all duration-500 ${className}`}>
+    {children}
+  </div>
+);
+
+const SectionTitle = ({ icon, title }) => (
+  <h2 className="text-2xl font-bold text-slate-100 flex items-center gap-3 mb-8">
+    <span className="p-2 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-lg text-white shadow-lg shadow-blue-500/50">
+      {icon}
+    </span>
+    {title}
+  </h2>
+);
+
+const Dashboard = ({ onNavigate }) => {
   return (
-    <div className="min-h-screen bg-slate-900 text-slate-100 font-sans selection:bg-blue-500 selection:text-white">
-      {/* Navigation */}
-      <nav className="fixed top-0 w-full z-50 bg-slate-900/90 backdrop-blur-md border-b border-slate-700">
-        <div className="container mx-auto px-6 py-4 flex justify-between items-center">
-          <div className="flex items-center space-x-2 font-bold text-xl text-blue-400">
-            <Terminal size={24} />
-            <span>DevOps<span className="text-slate-100">Engineer</span></span>
-          </div>
-          <div className="hidden md:flex space-x-8">
-            {navItems.map((item) => (
-              <a 
-                key={item.id}
-                href={`#${item.id}`}
-                className="text-sm font-medium hover:text-blue-400 transition-colors"
-              >
-                {item.label}
-              </a>
-            ))}
-          </div>
-          <a href="#contact" className="px-4 py-2 text-sm font-bold bg-blue-600 hover:bg-blue-500 rounded-lg transition-all">
-            Hubungi Saya
-          </a>
-        </div>
-      </nav>
+    <div className="space-y-16 animate-fadeIn">
+      {/* Animated Background Gradient */}
+      <div className="fixed inset-0 -z-10 overflow-hidden">
+        <div className="absolute top-0 right-0 w-96 h-96 bg-blue-500/20 rounded-full blur-3xl animate-pulse"></div>
+        <div className="absolute bottom-0 left-0 w-96 h-96 bg-purple-500/20 rounded-full blur-3xl animate-pulse delay-1000"></div>
+        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-emerald-500/20 rounded-full blur-3xl animate-pulse delay-500"></div>
+      </div>
 
       {/* Hero Section */}
-      <section id="hero" className="pt-32 pb-20 px-6">
-        <div className="container mx-auto text-center max-w-4xl">
-          <div className="inline-block mb-4 px-3 py-1 bg-blue-900/30 border border-blue-500/30 rounded-full text-blue-300 text-sm font-mono">
-            iOS Developer ➔ DevOps Engineer
-          </div>
-          <h1 className="text-5xl md:text-7xl font-bold mb-6 tracking-tight bg-gradient-to-r from-white via-blue-100 to-slate-400 bg-clip-text text-transparent">
-            Bridging Mobile Development & Cloud Infrastructure
-          </h1>
-          <p className="text-xl text-slate-400 mb-10 max-w-2xl mx-auto leading-relaxed">
-            Membangun infrastruktur yang reliabel, aman, dan terukur. Menggabungkan ketelitian pengembangan iOS dengan kekuatan otomasi Cloud-Native.
-          </p>
-          <div className="flex justify-center space-x-4">
-            <button className="flex items-center space-x-2 px-6 py-3 bg-white text-slate-900 font-bold rounded-lg hover:bg-slate-200 transition-colors">
-              <Github size={20} />
-              <span>Lihat GitHub</span>
-            </button>
-            <button className="flex items-center space-x-2 px-6 py-3 border border-slate-600 hover:border-blue-400 text-slate-300 hover:text-blue-400 rounded-lg transition-all">
-              <Linkedin size={20} />
-              <span>LinkedIn</span>
-            </button>
-          </div>
+      <section className="text-center py-20 px-4 relative">
+        <div className="inline-flex items-center gap-2 px-4 py-1.5 mb-6 rounded-full bg-gradient-to-r from-blue-500/10 to-purple-500/10 border border-blue-500/20 text-blue-400 text-sm font-medium backdrop-blur-sm">
+          <Sparkles size={16} className="animate-spin-slow" />
+          Welcome to my digital workspace
         </div>
+        
+        <h1 className="text-6xl md:text-8xl font-bold mb-6 tracking-tight">
+          <span className="bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 bg-clip-text text-transparent animate-gradient">
+            {DATA.profile.name}
+          </span>
+        </h1>
+        
+        <p className="text-xl md:text-2xl text-slate-300 max-w-2xl mx-auto leading-relaxed mb-4">
+          {DATA.profile.tagline}
+        </p>
+        
+        <p className="text-lg text-slate-400 italic mb-8">
+          {DATA.profile.title}
+        </p>
+        
+        <div className="flex justify-center gap-4 mb-8">
+          <a 
+            href={DATA.profile.social.github} 
+            target="_blank" 
+            rel="noreferrer" 
+            className="group p-4 rounded-full bg-gradient-to-br from-slate-800 to-slate-900 border border-slate-700 hover:border-blue-500 text-slate-300 hover:text-white transition-all duration-300 hover:shadow-lg hover:shadow-blue-500/50 hover:-translate-y-1"
+          >
+            <Github size={24} className="group-hover:scale-110 transition-transform" />
+          </a>
+          <a 
+            href={DATA.profile.social.linkedin} 
+            target="_blank" 
+            rel="noreferrer" 
+            className="group p-4 rounded-full bg-gradient-to-br from-slate-800 to-slate-900 border border-slate-700 hover:border-blue-500 text-slate-300 hover:text-white transition-all duration-300 hover:shadow-lg hover:shadow-blue-500/50 hover:-translate-y-1"
+          >
+            <Linkedin size={24} className="group-hover:scale-110 transition-transform" />
+          </a>
+          <a 
+            href={DATA.profile.social.email} 
+            className="group p-4 rounded-full bg-gradient-to-br from-slate-800 to-slate-900 border border-slate-700 hover:border-blue-500 text-slate-300 hover:text-white transition-all duration-300 hover:shadow-lg hover:shadow-blue-500/50 hover:-translate-y-1"
+          >
+            <Mail size={24} className="group-hover:scale-110 transition-transform" />
+          </a>
+        </div>
+
+        <button className="group inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 text-white font-semibold rounded-full shadow-lg shadow-blue-500/50 hover:shadow-xl hover:shadow-blue-500/70 transition-all duration-300 hover:-translate-y-1">
+          <Download size={20} />
+          Download Resume
+          <ChevronRight size={20} className="group-hover:translate-x-1 transition-transform" />
+        </button>
       </section>
 
-      {/* About Section */}
-      <section id="about" className="py-20 bg-slate-800/50">
-        <div className="container mx-auto px-6 grid md:grid-cols-2 gap-12 items-center">
-          <div>
-            <h2 className="text-3xl font-bold mb-6 flex items-center">
-              <span className="w-10 h-1 bg-blue-500 mr-4"></span>
-              Filosofi Rekayasa
-            </h2>
-            <p className="text-slate-300 mb-4 leading-relaxed">
-              Sebagai mantan iOS Developer, saya memahami rasa frustrasi ketika *build* gagal atau deployment memakan waktu berjam-jam. Transisi saya ke DevOps didorong oleh keinginan untuk memecahkan masalah sistemik tersebut.
-            </p>
-            <p className="text-slate-300 mb-6 leading-relaxed">
-              Saya tidak hanya melihat infrastruktur sebagai server, tetapi sebagai produk yang harus dikelola dengan prinsip <em>"Everything as Code"</em>. Keunggulan saya terletak pada kemampuan menjembatani kesenjangan antara tim mobile dan tim operasi infrastruktur backend.
-            </p>
-            <div className="grid grid-cols-2 gap-4">
-              <div className="p-4 bg-slate-900 rounded-lg border border-slate-700">
-                <Smartphone className="text-blue-400 mb-2" />
-                <h3 className="font-bold">Mobile First Context</h3>
-                <p className="text-xs text-slate-400">Paham nuansa Xcode, Signing, & Provisioning.</p>
-              </div>
-              <div className="p-4 bg-slate-900 rounded-lg border border-slate-700">
-                <Cloud className="text-blue-400 mb-2" />
-                <h3 className="font-bold">Cloud Native Action</h3>
-                <p className="text-xs text-slate-400">Implementasi IaC, Containerization & CI/CD.</p>
-              </div>
-            </div>
-          </div>
-          <div className="relative">
-            <div className="absolute inset-0 bg-blue-500 blur-[100px] opacity-20"></div>
-            <div className="relative bg-slate-900 border border-slate-700 p-6 rounded-xl font-mono text-sm shadow-2xl">
-              <div className="flex space-x-2 mb-4">
-                <div className="w-3 h-3 rounded-full bg-red-500"></div>
-                <div className="w-3 h-3 rounded-full bg-yellow-500"></div>
-                <div className="w-3 h-3 rounded-full bg-green-500"></div>
-              </div>
-              <p className="text-slate-400"># Transitioning skills...</p>
-              <p className="text-purple-400">class <span className="text-yellow-300">Engineer</span> <span className="text-slate-100">{`{`}</span></p>
-              <div className="pl-4">
-                <p className="text-blue-400">current_role: <span className="text-green-300">"DevOps Engineer"</span></p>
-                <p className="text-blue-400">background: <span className="text-green-300">"iOS Specialist"</span></p>
-                <p className="text-blue-400">mission: <span className="text-green-300">"Automate Everything"</span></p>
-                <p className="text-blue-400">stack: <span className="text-yellow-300">[</span></p>
-                <div className="pl-4 text-green-300">
-                  "AWS", "Terraform", "Kubernetes",<br/>
-                  "Fastlane", "GitHub Actions"<br/>
-                </div>
-                <p className="text-yellow-300">]</p>
-              </div>
-              <p className="text-slate-100">{`}`}</p>
-            </div>
-          </div>
+      {/* Navigation Cards (The 3 Portfolios) */}
+      <section className="container mx-auto px-4">
+        <div className="text-center mb-12">
+          <h2 className="text-4xl font-bold text-slate-100 mb-4">Explore My Work</h2>
+          <p className="text-slate-400">Click on any area to dive deeper into my projects</p>
         </div>
-      </section>
-
-      {/* Tech Stack Section */}
-      <section id="skills" className="py-20 px-6">
-        <div className="container mx-auto">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl font-bold mb-4">Peta Kompetensi Teknis</h2>
-            <p className="text-slate-400">Kombinasi alat industri standar dan spesialisasi mobile.</p>
-          </div>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {[
-              { 
-                title: "Cloud Platform", 
-                icon: <Cloud className="w-6 h-6" />, 
-                skills: ["AWS (Primary)", "Alibaba Cloud (Secondary)", "EC2/ECS", "S3 & RDS"] 
-              },
-              { 
-                title: "CI/CD & Mobile Ops", 
-                icon: <GitBranch className="w-6 h-6" />, 
-                skills: ["GitHub Actions", "Fastlane (Ruby)", "Jenkins", "TestFlight Automation"] 
-              },
-              { 
-                title: "Container & Orchestration", 
-                icon: <Server className="w-6 h-6" />, 
-                skills: ["Docker", "Kubernetes (K8s)", "Helm Charts", "Container Registry"] 
-              },
-              { 
-                title: "Infrastructure as Code", 
-                icon: <Code className="w-6 h-6" />, 
-                skills: ["Terraform", "Ansible", "HCL Modules", "State Management"] 
-              },
-              { 
-                title: "Observability", 
-                icon: <Cpu className="w-6 h-6" />, 
-                skills: ["Prometheus", "Grafana", "ELK Stack", "CloudWatch"] 
-              },
-              { 
-                title: "Security (DevSecOps)", 
-                icon: <ShieldCheck className="w-6 h-6" />, 
-                skills: ["Fastlane Match", "SSL/TLS", "IAM Policies", "Secret Manager"] 
-              }
-            ].map((category, idx) => (
-              <div key={idx} className="bg-slate-800/50 p-6 rounded-xl hover:bg-slate-800 transition-colors border border-slate-700/50 hover:border-blue-500/50 group">
-                <div className="flex items-center mb-4 text-blue-400 group-hover:text-blue-300">
-                  {category.icon}
-                  <h3 className="ml-3 font-bold text-lg text-slate-100">{category.title}</h3>
-                </div>
-                <ul className="space-y-2">
-                  {category.skills.map((skill, sIdx) => (
-                    <li key={sIdx} className="flex items-center text-slate-400 text-sm">
-                      <span className="w-1.5 h-1.5 bg-blue-500 rounded-full mr-2"></span>
-                      {skill}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Projects Section */}
-      <section id="projects" className="py-20 bg-slate-900">
-        <div className="container mx-auto px-6">
-          <h2 className="text-3xl font-bold mb-12 text-center">Featured Projects</h2>
-          <div className="space-y-16">
-            
-            {/* Project 1 */}
-            <div className="bg-slate-800 rounded-2xl overflow-hidden border border-slate-700 flex flex-col lg:flex-row">
-              <div className="p-8 lg:w-2/3">
-                <div className="flex items-center space-x-3 mb-4">
-                  <span className="px-3 py-1 bg-green-500/20 text-green-400 text-xs font-bold rounded-full">Completed</span>
-                  <span className="px-3 py-1 bg-blue-500/20 text-blue-400 text-xs font-bold rounded-full">Killer Feature</span>
-                </div>
-                <h3 className="text-2xl font-bold mb-4">The "Hybrid" Pipeline: Mobile CI/CD Automation</h3>
-                <p className="text-slate-300 mb-6">
-                  Membangun pipeline CI/CD lengkap untuk aplikasi iOS menggunakan GitHub Actions dan Fastlane. Mengatasi masalah klasik manajemen sertifikat dengan Fastlane Match dan penyimpanan terenkripsi di S3.
-                </p>
-                <div className="mb-6">
-                  <h4 className="text-sm font-bold text-slate-400 uppercase mb-2">Key Tech</h4>
-                  <div className="flex flex-wrap gap-2">
-                    {['Fastlane', 'GitHub Actions', 'Ruby', 'S3', 'TestFlight'].map(tag => (
-                      <span key={tag} className="px-2 py-1 bg-slate-900 border border-slate-600 rounded text-xs text-slate-300">{tag}</span>
-                    ))}
-                  </div>
-                </div>
-                <div className="space-y-2">
-                  <div className="flex items-start">
-                    <CheckCircle className="w-5 h-5 text-green-500 mr-2 mt-0.5" />
-                    <p className="text-sm text-slate-400">Mengurangi waktu rilis dari 2 jam (manual) menjadi 15 menit (otomatis).</p>
-                  </div>
-                  <div className="flex items-start">
-                    <CheckCircle className="w-5 h-5 text-green-500 mr-2 mt-0.5" />
-                    <p className="text-sm text-slate-400">Zero-touch certificate management untuk tim developer.</p>
-                  </div>
-                </div>
-              </div>
-              <div className="bg-slate-900/50 lg:w-1/3 p-8 border-t lg:border-t-0 lg:border-l border-slate-700 flex flex-col justify-center items-center">
-                <div className="text-center">
-                  <GitBranch size={48} className="text-slate-600 mx-auto mb-4" />
-                  <h4 className="font-bold text-slate-300 mb-2">Architecture Highlight</h4>
-                  <p className="text-xs text-slate-500 mb-6">Push ➔ Actions ➔ Fastlane Match ➔ Build & Sign ➔ TestFlight</p>
-                  <button className="text-sm text-blue-400 hover:text-blue-300 flex items-center justify-center mx-auto">
-                    Lihat Repository <ExternalLink size={14} className="ml-1" />
-                  </button>
-                </div>
-              </div>
-            </div>
-
-            {/* Project 2 */}
-            <div className="bg-slate-800 rounded-2xl overflow-hidden border border-slate-700 flex flex-col lg:flex-row">
-              <div className="p-8 lg:w-2/3 order-2 lg:order-1">
-                <div className="flex items-center space-x-3 mb-4">
-                   <span className="px-3 py-1 bg-purple-500/20 text-purple-400 text-xs font-bold rounded-full">Infrastructure as Code</span>
-                </div>
-                <h3 className="text-2xl font-bold mb-4">Cloud-Native Web Infrastructure (AWS/Alibaba)</h3>
-                <p className="text-slate-300 mb-6">
-                  Perancangan infrastruktur modular menggunakan Terraform. Mengimplementasikan VPC, Auto Scaling Group, dan Load Balancer. Fokus pada <em>State Management</em> yang aman menggunakan DynamoDB locking untuk mencegah konflik tim.
-                </p>
-                <div className="mb-6">
-                  <h4 className="text-sm font-bold text-slate-400 uppercase mb-2">Key Tech</h4>
-                  <div className="flex flex-wrap gap-2">
-                    {['Terraform', 'AWS', 'Docker', 'ECS', 'VPC'].map(tag => (
-                      <span key={tag} className="px-2 py-1 bg-slate-900 border border-slate-600 rounded text-xs text-slate-300">{tag}</span>
-                    ))}
-                  </div>
-                </div>
-                <div className="space-y-2">
-                  <div className="flex items-start">
-                    <CheckCircle className="w-5 h-5 text-green-500 mr-2 mt-0.5" />
-                    <p className="text-sm text-slate-400">Implementasi modul Terraform yang <em>reusable</em> (Network, Compute, DB).</p>
-                  </div>
-                  <div className="flex items-start">
-                    <CheckCircle className="w-5 h-5 text-green-500 mr-2 mt-0.5" />
-                    <p className="text-sm text-slate-400">Keamanan jaringan via Security Groups yang ketat.</p>
-                  </div>
-                </div>
-              </div>
-              <div className="bg-slate-900/50 lg:w-1/3 p-8 border-b lg:border-b-0 lg:border-r border-slate-700 flex flex-col justify-center items-center order-1 lg:order-2">
-                 <div className="text-center">
-                  <Cloud size={48} className="text-slate-600 mx-auto mb-4" />
-                  <h4 className="font-bold text-slate-300 mb-2">Architecture Highlight</h4>
-                  <p className="text-xs text-slate-500 mb-6">Terraform State di S3 + DynamoDB Lock</p>
-                  <button className="text-sm text-blue-400 hover:text-blue-300 flex items-center justify-center mx-auto">
-                    Lihat Repository <ExternalLink size={14} className="ml-1" />
-                  </button>
-                </div>
-              </div>
-            </div>
-
-          </div>
-        </div>
-      </section>
-
-      {/* Incident Logs / Problem Solving Section */}
-      <section id="incidents" className="py-20 bg-slate-800/30">
-        <div className="container mx-auto px-6 max-w-4xl">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold mb-4 flex items-center justify-center">
-              <AlertTriangle className="mr-3 text-yellow-500" />
-              Incident Logs (Problem Solving)
-            </h2>
-            <p className="text-slate-400">
-              Dokumentasi nyata penyelesaian masalah menggunakan metode STAR (Situation, Task, Action, Result).
-            </p>
-          </div>
-
-          <div className="space-y-4">
-            {[
-              {
-                title: "Misteri 'Connection Refused' pada Docker Container",
-                tags: ["Docker", "Networking"],
-                content: {
-                  s: "Saat deployment microservices, frontend container gagal menghubungi backend API di localhost:8080.",
-                  t: "Mengidentifikasi penyebab kegagalan komunikasi antar-container.",
-                  a: "Investigasi mengungkap bahwa 'localhost' di dalam container merujuk ke container itu sendiri. Solusi: Menggunakan nama service Docker (http://backend-api:8080) yang di-resolve oleh Docker DNS internal.",
-                  r: "Komunikasi pulih. Mengimplementasikan ENV VAR untuk URL agar dinamis di tiap environment."
-                }
-              },
-              {
-                title: "Terraform State Lock ('Deadlock' Infrastruktur)",
-                tags: ["Terraform", "CI/CD"],
-                content: {
-                  s: "Pipeline CI/CD gagal dengan error 'Error acquiring the state lock' karena proses sebelumnya dibatalkan paksa.",
-                  t: "Membuka kunci state file tanpa merusak data infrastruktur (corrupt state).",
-                  a: "Analisis tabel DynamoDB Lock. Menggunakan perintah `terraform force-unlock <ID>` setelah verifikasi tim. Menambahkan timeout pada CI job untuk pencegahan.",
-                  r: "Pipeline kembali normal dan tim diedukasi mengenai bahaya SIGKILL pada proses Terraform."
-                }
-              },
-              {
-                title: "Kubernetes CrashLoopBackOff (OOMKilled)",
-                tags: ["Kubernetes", "Java"],
-                content: {
-                  s: "Pod aplikasi terus menerus restart setelah deployment baru.",
-                  t: "Mendiagnosa akar masalah startup failure pada cluster.",
-                  a: "Cek `kubectl describe pod` menemukan exit code 137 (OOMKilled). Limit memori di YAML terlalu kecil untuk heap Java app. Action: Menaikkan resource limits dan tuning Liveness Probe.",
-                  r: "Pod mencapai status Stable/Running."
-                }
-              },
-              {
-                title: "Code Signing 'Nightmare' pada CI/CD (iOS Specialization)",
-                tags: ["Fastlane", "iOS", "Security"],
-                content: {
-                  s: "Build gagal di GitHub Actions karena runner (mesin virtual) tidak memiliki sertifikat distribusi di Keychain.",
-                  t: "Otomasi instalasi sertifikat secara aman tanpa commit file .p12 ke repo.",
-                  a: "Implementasi Fastlane Match dengan repo privat terenkripsi. Menambahkan step decrypt pada pipeline CI hanya saat build berjalan.",
-                  r: "Build sukses 100% di cloud runner yang bersih (ephemeral) tanpa intervensi manual."
-                }
-              }
-            ].map((incident, idx) => (
-              <div key={idx} className="bg-slate-900 border border-slate-700 rounded-lg overflow-hidden">
-                <button 
-                  onClick={() => toggleIncident(idx)}
-                  className="w-full px-6 py-4 flex justify-between items-center hover:bg-slate-800 transition-colors text-left"
-                >
-                  <div>
-                    <h3 className="font-bold text-slate-200">{incident.title}</h3>
-                    <div className="flex gap-2 mt-2">
-                      {incident.tags.map(tag => (
-                        <span key={tag} className="text-xs px-2 py-0.5 bg-slate-800 text-slate-400 rounded border border-slate-700">{tag}</span>
-                      ))}
-                    </div>
-                  </div>
-                  {openIncident === idx ? <ChevronUp className="text-blue-400" /> : <ChevronDown className="text-slate-500" />}
-                </button>
+        
+        <div className="grid md:grid-cols-3 gap-6">
+          {Object.values(DATA.portfolios).map((portfolio) => (
+            <button
+              key={portfolio.id}
+              onClick={() => onNavigate(portfolio.id)}
+              className="group text-left relative overflow-hidden"
+            >
+              <Card className="h-full hover:-translate-y-3 border-2 hover:border-transparent relative">
+                {/* Gradient Background on Hover */}
+                <div className={`absolute inset-0 bg-gradient-to-br ${portfolio.bgGradient} opacity-0 group-hover:opacity-100 transition-opacity duration-500`} />
                 
-                {openIncident === idx && (
-                  <div className="px-6 py-6 bg-slate-900/50 border-t border-slate-700 grid md:grid-cols-2 gap-6 animate-fadeIn">
-                    <div className="space-y-4">
-                      <div>
-                        <span className="text-xs font-bold text-yellow-500 uppercase tracking-wider">Situation</span>
-                        <p className="text-sm text-slate-300 mt-1">{incident.content.s}</p>
-                      </div>
-                      <div>
-                        <span className="text-xs font-bold text-blue-500 uppercase tracking-wider">Task</span>
-                        <p className="text-sm text-slate-300 mt-1">{incident.content.t}</p>
-                      </div>
-                    </div>
-                    <div className="space-y-4">
-                      <div>
-                        <span className="text-xs font-bold text-green-500 uppercase tracking-wider">Action</span>
-                        <p className="text-sm text-slate-300 mt-1">{incident.content.a}</p>
-                      </div>
-                      <div>
-                        <span className="text-xs font-bold text-purple-500 uppercase tracking-wider">Result</span>
-                        <p className="text-sm text-slate-300 mt-1">{incident.content.r}</p>
-                      </div>
-                    </div>
+                {/* Glowing Border Effect */}
+                <div className={`absolute inset-0 bg-gradient-to-r ${portfolio.color} opacity-0 group-hover:opacity-20 blur-xl transition-opacity duration-500`} />
+                
+                <div className="relative z-10">
+                  <div className={`mb-6 ${portfolio.textColor} group-hover:scale-110 transition-transform duration-300 origin-left`}>
+                    {portfolio.icon}
                   </div>
-                )}
-              </div>
-            ))}
-          </div>
+                  
+                  <h3 className={`text-2xl font-bold text-slate-100 mb-3 group-hover:bg-gradient-to-r ${portfolio.color} group-hover:bg-clip-text group-hover:text-transparent transition-all duration-300`}>
+                    {portfolio.title}
+                  </h3>
+                  
+                  <p className="text-slate-400 mb-6 text-sm leading-relaxed group-hover:text-slate-300 transition-colors">
+                    {portfolio.description}
+                  </p>
+                  
+                  <div className={`flex items-center text-sm font-bold ${portfolio.textColor} group-hover:text-white`}>
+                    Explore Portfolio 
+                    <ChevronRight size={16} className="ml-2 group-hover:translate-x-2 transition-transform duration-300" />
+                  </div>
+                </div>
+
+                {/* Corner Decoration */}
+                <div className={`absolute top-0 right-0 w-20 h-20 bg-gradient-to-br ${portfolio.color} opacity-10 blur-2xl group-hover:opacity-30 transition-opacity duration-500`}></div>
+              </Card>
+            </button>
+          ))}
         </div>
       </section>
 
-      {/* Footer */}
-      <footer id="contact" className="bg-slate-950 py-12 px-6 border-t border-slate-800">
-        <div className="container mx-auto text-center">
-          <h2 className="text-2xl font-bold mb-8">Siap Berkolaborasi?</h2>
-          <p className="text-slate-400 mb-8 max-w-xl mx-auto">
-            Saya siap membawa pengalaman mobile dan skill DevOps saya untuk meningkatkan efisiensi tim engineering Anda.
-          </p>
-          <div className="flex justify-center gap-6 mb-12">
-            <a href="#" className="flex items-center text-slate-300 hover:text-white transition-colors">
-              <Mail className="mr-2 h-5 w-5" /> email@example.com
-            </a>
-            <a href="#" className="flex items-center text-slate-300 hover:text-white transition-colors">
-              <Linkedin className="mr-2 h-5 w-5" /> LinkedIn Profile
-            </a>
-            <a href="#" className="flex items-center text-slate-300 hover:text-white transition-colors">
-              <Github className="mr-2 h-5 w-5" /> GitHub Profile
-            </a>
-          </div>
-          <div className="text-slate-600 text-sm">
-            &copy; 2026 Mobile DevOps Specialist Portfolio. Built with React & Tailwind.
-          </div>
+      {/* Profile Details */}
+      <section className="container mx-auto px-4 grid md:grid-cols-2 gap-8 pb-20">
+        
+        {/* About & Education */}
+        <div className="space-y-8">
+          <Card className="group hover:scale-[1.02] transition-transform duration-300">
+            <SectionTitle icon={<BookOpen size={20} />} title="About Me" />
+            <p className="text-slate-300 leading-relaxed text-lg">
+              {DATA.profile.about}
+            </p>
+            <div className="mt-6 h-1 w-20 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full"></div>
+          </Card>
+
+          <Card className="group hover:scale-[1.02] transition-transform duration-300">
+            <SectionTitle icon={<BookOpen size={20} />} title="Education" />
+            <div className="space-y-6">
+              {DATA.profile.education.map((edu, i) => (
+                <div key={i} className="pl-6 border-l-2 border-blue-500/50 hover:border-blue-500 transition-colors duration-300">
+                  <h4 className="text-lg font-bold text-slate-200">{edu.school}</h4>
+                  <p className="text-blue-400 font-semibold">{edu.degree}</p>
+                  <p className="text-slate-500 text-sm mt-1">{edu.year}</p>
+                </div>
+              ))}
+            </div>
+          </Card>
         </div>
-      </footer>
+
+        {/* Experience */}
+        <div className="space-y-8">
+          <Card className="group hover:scale-[1.02] transition-transform duration-300">
+            <SectionTitle icon={<Briefcase size={20} />} title="Work Experience" />
+            <div className="space-y-8">
+              {DATA.profile.experience.map((job, i) => (
+                <div key={i} className="relative pl-8 border-l-2 border-slate-700 hover:border-blue-500 transition-colors duration-300 group/item">
+                  <div className="absolute -left-[9px] top-0 w-4 h-4 rounded-full bg-slate-900 border-2 border-blue-500 group-hover/item:scale-125 group-hover/item:shadow-lg group-hover/item:shadow-blue-500/50 transition-all duration-300" />
+                  <h4 className="text-xl font-bold text-slate-200 group-hover/item:text-blue-400 transition-colors">
+                    {job.role}
+                  </h4>
+                  <p className="text-blue-400 text-sm mb-2 font-semibold">
+                    {job.company} • {job.period}
+                  </p>
+                  <p className="text-slate-400 text-sm leading-relaxed">
+                    {job.desc}
+                  </p>
+                </div>
+              ))}
+            </div>
+          </Card>
+        </div>
+
+      </section>
     </div>
   );
 };
 
-export default Portfolio;
+const PortfolioLayout = ({ data, onBack }) => {
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+
+  return (
+    <div className="min-h-screen animate-slideIn">
+      {/* Animated Background */}
+      <div className="fixed inset-0 -z-10 overflow-hidden">
+        <div className={`absolute top-0 right-0 w-96 h-96 bg-gradient-to-br ${data.color} opacity-20 rounded-full blur-3xl animate-pulse`}></div>
+        <div className={`absolute bottom-0 left-0 w-96 h-96 bg-gradient-to-br ${data.color} opacity-20 rounded-full blur-3xl animate-pulse delay-1000`}></div>
+      </div>
+
+      {/* Header Bar */}
+      <div className="sticky top-0 z-50 bg-slate-900/80 backdrop-blur-xl border-b border-slate-800/50 shadow-lg">
+        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
+          <button 
+            onClick={onBack}
+            className="group flex items-center gap-2 text-slate-400 hover:text-white transition-colors px-4 py-2 rounded-lg hover:bg-slate-800/50"
+          >
+            <ArrowLeft size={20} className="group-hover:-translate-x-1 transition-transform" />
+            Back to Dashboard
+          </button>
+          <div className={`flex items-center gap-3 font-bold bg-gradient-to-r ${data.color} bg-clip-text text-transparent`}>
+            <div className={`p-2 bg-gradient-to-br ${data.color} rounded-lg text-white shadow-lg`}>
+              {data.icon}
+            </div>
+            <span className="hidden sm:inline text-xl">{data.title}</span>
+          </div>
+        </div>
+      </div>
+
+      <div className="container mx-auto px-4 py-12">
+        {/* Header */}
+        <header className="mb-16 text-center max-w-3xl mx-auto">
+          <div className={`inline-block p-4 mb-6 rounded-2xl bg-gradient-to-br ${data.color} shadow-2xl`}>
+            <div className="text-white scale-150">
+              {data.icon}
+            </div>
+          </div>
+          <h1 className={`text-5xl md:text-6xl font-bold mb-6 bg-gradient-to-r ${data.color} bg-clip-text text-transparent`}>
+            {data.title} Portfolio
+          </h1>
+          <p className="text-xl text-slate-300 leading-relaxed">{data.description}</p>
+        </header>
+
+        {/* Tech Stack */}
+        <section className="mb-20">
+          <h2 className="text-3xl font-bold text-slate-100 mb-8 flex items-center justify-center gap-3">
+            <Layers className="text-slate-500" /> 
+            Technology Stack
+          </h2>
+          <div className="flex flex-wrap justify-center gap-4">
+            {data.skills.map((skill, idx) => (
+              <span 
+                key={idx} 
+                className={`group px-6 py-3 bg-gradient-to-br from-slate-800 to-slate-900 border-2 border-slate-700 hover:border-transparent rounded-full text-slate-300 hover:text-white text-sm font-semibold transition-all duration-300 hover:-translate-y-1 hover:shadow-xl relative overflow-hidden`}
+              >
+                <span className={`absolute inset-0 bg-gradient-to-r ${data.color} opacity-0 group-hover:opacity-20 transition-opacity duration-300`}></span>
+                <span className="relative z-10">{skill}</span>
+              </span>
+            ))}
+          </div>
+        </section>
+
+        {/* Projects Grid */}
+        <section className="mb-20">
+          <h2 className="text-3xl font-bold text-slate-100 mb-8 flex items-center gap-3">
+            <Code2 className="text-slate-500" /> 
+            Selected Projects
+          </h2>
+          <div className="grid md:grid-cols-2 gap-8">
+            {data.projects.map((project, idx) => (
+              <Card key={idx} className="group hover:scale-[1.02] relative overflow-hidden">
+                {/* Hover Gradient */}
+                <div className={`absolute inset-0 bg-gradient-to-br ${data.bgGradient} opacity-0 group-hover:opacity-100 transition-opacity duration-500`}></div>
+                
+                <div className="relative z-10">
+                  <div className="flex justify-between items-start mb-4">
+                    <div className="flex gap-2 flex-wrap">
+                      {project.tags.map(tag => (
+                        <span key={tag} className={`text-xs font-mono px-3 py-1.5 bg-slate-900/80 backdrop-blur-sm rounded-lg border border-slate-700 group-hover:border-transparent group-hover:bg-gradient-to-r ${data.color} group-hover:text-white transition-all duration-300`}>
+                          {tag}
+                        </span>
+                      ))}
+                    </div>
+                    <a 
+                      href={project.link} 
+                      className={`p-2 text-slate-500 hover:text-white transition-colors rounded-lg hover:bg-gradient-to-br ${data.color} hover:shadow-lg`}
+                    >
+                      <ExternalLink size={18} />
+                    </a>
+                  </div>
+                  
+                  <h3 className={`text-2xl font-bold text-slate-100 mb-3 group-hover:bg-gradient-to-r ${data.color} group-hover:bg-clip-text group-hover:text-transparent transition-all duration-300`}>
+                    {project.title}
+                  </h3>
+                  
+                  <p className="text-slate-400 leading-relaxed group-hover:text-slate-300 transition-colors">
+                    {project.desc}
+                  </p>
+
+                  <div className={`mt-6 h-1 w-0 group-hover:w-full bg-gradient-to-r ${data.color} rounded-full transition-all duration-500`}></div>
+                </div>
+              </Card>
+            ))}
+          </div>
+        </section>
+
+        {/* Call to Action */}
+        <section className="text-center py-16 relative overflow-hidden rounded-3xl">
+          <div className={`absolute inset-0 bg-gradient-to-br ${data.color} opacity-10`}></div>
+          <div className={`absolute inset-0 bg-gradient-to-br ${data.bgGradient}`}></div>
+          
+          <div className="relative z-10">
+            <h3 className="text-3xl font-bold text-slate-100 mb-4">
+              Interested in my {data.title} work?
+            </h3>
+            <p className="text-slate-300 mb-8 text-lg">
+              Let's discuss how I can contribute to your next project.
+            </p>
+            <a 
+              href={DATA.profile.social.email}
+              className={`group inline-flex items-center gap-2 px-8 py-4 bg-gradient-to-r ${data.color} hover:shadow-2xl text-white font-bold rounded-full transition-all duration-300 hover:-translate-y-1`}
+            >
+              <Mail size={20} /> 
+              Contact Me
+              <ChevronRight size={20} className="group-hover:translate-x-1 transition-transform" />
+            </a>
+          </div>
+        </section>
+      </div>
+    </div>
+  );
+};
+
+const App = () => {
+  const [currentView, setCurrentView] = useState('dashboard');
+
+  const renderView = () => {
+    switch (currentView) {
+      case 'ios':
+        return <PortfolioLayout data={DATA.portfolios.ios} onBack={() => setCurrentView('dashboard')} />;
+      case 'devops':
+        return <PortfolioLayout data={DATA.portfolios.devops} onBack={() => setCurrentView('dashboard')} />;
+      case 'game':
+        return <PortfolioLayout data={DATA.portfolios.game} onBack={() => setCurrentView('dashboard')} />;
+      default:
+        return <Dashboard onNavigate={setCurrentView} />;
+    }
+  };
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 text-slate-200 font-sans selection:bg-blue-500/30 selection:text-blue-200">
+      {renderView()}
+    </div>
+  );
+};
+
+export default App;
