@@ -46,11 +46,11 @@ jobs:
     # 7. Check Build Output
     - name: Verify Build Output
       run: |
-        if [ -d "dist" ]; then
-          echo "✅ Build successful - dist folder created"
-          ls -la dist
+        if [ -d ".next" ]; then
+          echo "✅ Build successful - .next folder created"
+          ls -la .next
         else
-          echo "❌ Build failed - dist folder not found"
+          echo "❌ Build failed - .next folder not found"
           exit 1
         fi
 
@@ -59,7 +59,7 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: production-build
-        path: dist/
+        path: .next/
         retention-days: 7
 
     # 9. Build Docker Image (if you're using Docker)
