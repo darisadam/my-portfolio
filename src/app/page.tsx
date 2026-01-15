@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { Card } from "@/components/ui/card";
+import { AboutSection } from "@/components/sections/AboutSection";
 
 export default function Home() {
   const socialLinks = [
@@ -111,6 +112,8 @@ export default function Home() {
           </div>
         </section>
 
+
+
         {/* Navigation Grid */}
         <section className="grid md:grid-cols-3 gap-6">
           {portfolios.map((item, index) => (
@@ -137,6 +140,9 @@ export default function Home() {
             </Link>
           ))}
         </section>
+
+        {/* About Section */}
+        <AboutSection />
       </motion.div>
     </main>
   );
