@@ -265,7 +265,7 @@ export default function DevOpsPage() {
                     <div className="space-y-4 max-w-4xl">
                         <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-bold uppercase tracking-wider">
                             <Cloud size={12} />
-                            Senior Cloud Architect
+                            Ops & Infrastructure Engineer
                         </div>
                         <h1 className="text-4xl md:text-6xl font-bold text-white tracking-tight leading-tight">
                             Cost-Aware & Scalable <br />
