@@ -1,5 +1,4 @@
-"use client";
-
+import type { Metadata } from "next";
 import {
     Cloud,
     ArrowLeft,
@@ -26,6 +25,13 @@ import {
     Github
 } from "lucide-react";
 import Link from "next/link";
+
+export const metadata: Metadata = {
+    title: "DevOps Portfolio | Cloud Architect & SRE",
+    description: "Showcasing enterprise-grade DevOps implementations: Cost Optimization, Kubernetes Autoscaling, Mobile CI/CD pipelines, and FinOps strategies.",
+    keywords: ["DevOps", "SRE", "Cloud Architect", "AWS", "Kubernetes", "Terraform", "GitOps", "FinOps", "iOS CI/CD"]
+};
+
 import Image from "next/image";
 import { Card } from "@/components/ui/card";
 
@@ -45,7 +51,7 @@ const PROJECTS = [
             "Reduced development infrastructure costs by 100% during the testing phase.",
             "Achieved zero configuration drift between Staging and Production."
         ],
-        image: "/images/devops/devops_project_qr_platform_1770099566612.png",
+        image: "/images/devops/devops_fullstack_qrcode.webp",
         repo: "https://github.com/darisadam/devops-qr-code",
         highlight: true
     },
@@ -64,7 +70,7 @@ const PROJECTS = [
             "Significant OPEX reduction while maintaining 99.9% uptime.",
             "Reduced Mean Time to Resolution (MTTR) for bugs by pinpointing logs instantly via Loki."
         ],
-        image: "/images/devops/devops_project_madabank_monitoring_1770099585003.png",
+        image: "/images/devops/devops_backend_madabank.webp",
         repo: "https://github.com/darisadam/madabank-server",
         highlight: false
     },
@@ -83,7 +89,7 @@ const PROJECTS = [
             "0% Crash Rate in production due to enforced testing gates.",
             "Saved ~20 engineering hours per month by automating the release process."
         ],
-        image: "/images/devops/devops_project_ios_pipeline_1770099605903.png",
+        image: "/images/devops/devops_ios_madabank.webp",
         repo: "https://github.com/madabank/madabank-ios",
         highlight: false
     },
@@ -101,7 +107,7 @@ const PROJECTS = [
         impact: [
             "Achieved perfect Lighthouse scores (100/100) and sub-second global load times."
         ],
-        image: "/images/devops/devops_project_portfolio_edge_1770099623959.png",
+        image: "/images/devops/devops_frontend_portfolio.webp",
         repo: "https://github.com/darisadam/my-portfolio",
         highlight: false
     }
